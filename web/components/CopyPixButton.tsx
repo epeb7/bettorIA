@@ -28,7 +28,10 @@ export function CopyPixButton({ payload }: { payload: string }) {
         fontWeight: 600,
         cursor: "pointer",
         fontFamily: "inherit",
-        padding: "6px 0",
+        // padding maior que o texto precisa, de propósito: mantém a
+        // fonte pequena mas garante ~44px de área de toque real
+        padding: "13px 8px",
+        margin: "-13px -8px",
       }}
     >
       {copied ? "Código copiado!" : "ou toque para copiar o código Pix"}

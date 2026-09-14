@@ -38,21 +38,11 @@ export function Glossary() {
     <>
       <button
         type="button"
+        className={styles.trigger}
         onClick={() => setOpen(true)}
         aria-label="O que esses termos significam"
-        style={{
-          background: "var(--surface-2)",
-          border: "none",
-          borderRadius: "50%",
-          width: 30,
-          height: 30,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-        }}
       >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="16" x2="12" y2="12" />
           <line x1="12" y1="8" x2="12.01" y2="8" />

@@ -1,24 +1,46 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: oklch(0.22 0.01 90 / 0.4);
+  background: oklch(0.22 0.01 90 / 0.45);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: center;
   z-index: 50;
+  /* nunca encosta na borda da tela, nem atrás do entalhe/home indicator */
+  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
 }
 
 .sheet {
   width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
+  max-width: 380px;
   background: var(--surface);
-  border-radius: 24px 24px 0 0;
-  padding: 22px 22px 28px;
+  border-radius: 24px;
+  padding: 24px 22px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  max-height: 80vh;
+  /* dvh, não vh — no mobile a barra de endereço soma/tira altura real da
+     tela, e vh puro fica errado exatamente quando ela aparece/some */
+  max-height: min(560px, 85dvh);
   overflow-y: auto;
+}
+
+.trigger {
+  background: var(--surface-2);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .header {
@@ -36,12 +58,15 @@
   background: var(--surface-2);
   border: none;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  /* 44px é o alvo de toque mínimo recomendado pra mobile — abaixo disso
+     é fácil errar o dedo, principalmente com uma mão só */
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
 }
 .close:focus-visible {
   outline: 2px solid var(--accent);
