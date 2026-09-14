@@ -1,0 +1,74 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  text-align: center;
+}
+
+.wordmark {
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+}
+
+.amount {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.amountLabel {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.amountValue {
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.qrFrame {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 1px 3px oklch(0.22 0.01 90 / 0.06);
+  line-height: 0;
+}
+
+.qrFrame svg {
+  display: block;
+  width: 220px;
+  height: 220px;
+}
+
+.instruction {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.missingConfig {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  background: var(--surface-2);
+  border-radius: 16px;
+  padding: 18px 20px;
+}
+
+.missingConfig code {
+  font-family: var(--font-mono), monospace;
+  font-size: 12.5px;
+}
