@@ -18,3 +18,6 @@ graphify-out/
 # sistema
 .DS_Store
 *.log
+
+# cache de build do TypeScript
+*.tsbuildinfo
