@@ -1,0 +1,17 @@
+.feed {
+  flex: 1;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+}
+
+/* esconde a barra de rolagem — o snap já indica a posição, uma barra ao
+   lado só entra na frente da sensação de "feed", não de lista */
+.feed::-webkit-scrollbar {
+  display: none;
+}
+.feed {
+  scrollbar-width: none;
+}

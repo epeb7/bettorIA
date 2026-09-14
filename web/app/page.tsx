@@ -1,7 +1,6 @@
 import styles from "./page.module.css";
 import { Header } from "@/components/Header";
-import { TrackRecordCard } from "@/components/TrackRecordCard";
-import { AlertCard } from "@/components/AlertCard";
+import { AlertFeed } from "@/components/AlertFeed";
 import { ChatBar } from "@/components/ChatBar";
 import type { MatchAlert, TrackRecord } from "@/lib/types";
 
@@ -46,14 +45,8 @@ const SUGGESTED_QUESTIONS = ["Por que esse escanteio?"];
 export default function HomePage() {
   return (
     <main className={styles.page}>
-      <Header />
-      <div className={styles.feed}>
-        <TrackRecordCard record={SAMPLE_TRACK_RECORD} />
-        <span className={styles.sectionLabel}>Alertas de hoje</span>
-        {SAMPLE_ALERTS.map((alert) => (
-          <AlertCard key={alert.id} alert={alert} />
-        ))}
-      </div>
+      <Header trackRecord={SAMPLE_TRACK_RECORD} />
+      <AlertFeed alerts={SAMPLE_ALERTS} />
       <ChatBar suggestedQuestions={SUGGESTED_QUESTIONS} />
     </main>
   );

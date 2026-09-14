@@ -1,9 +1,18 @@
 import styles from "./Header.module.css";
+import { formatPercent } from "@/lib/format";
+import type { TrackRecord } from "@/lib/types";
 
-export function Header() {
+export function Header({ trackRecord }: { trackRecord?: TrackRecord }) {
   return (
     <header className={styles.header}>
-      <span className={styles.wordmark}>bettorIA</span>
+      <div className={styles.left}>
+        <span className={styles.wordmark}>bettorIA</span>
+        {trackRecord && (
+          <span className={`${styles.clvPill} mono`}>
+            CLV {formatPercent(trackRecord.avgClv)}
+          </span>
+        )}
+      </div>
       <button className={styles.avatar} aria-label="Perfil e configurações" type="button">
         <svg
           width="17"
