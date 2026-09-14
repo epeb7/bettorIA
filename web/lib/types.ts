@@ -8,7 +8,8 @@ export interface MatchAlert {
   homeTeam: string;
   awayTeam: string;
   league: string;
-  kickoffLabel: string; // ex: "hoje 21:00" — já formatado
+  /** horário real do jogo, ISO 8601 — vira "hoje 21:00" e contagem regressiva no navegador, sem chamada nenhuma */
+  kickoffAt: string;
   market: string; // ex: "Escanteios — Over 9.5"
   bet365Odd: number;
   fairOdd: number;

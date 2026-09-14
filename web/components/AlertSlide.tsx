@@ -1,5 +1,8 @@
 import styles from "./AlertSlide.module.css";
 import { formatOdd, formatPercent } from "@/lib/format";
+import { formatKickoffLabel } from "@/lib/time";
+import { explainAlert } from "@/lib/explain";
+import { Countdown } from "./Countdown";
 import type { MatchAlert } from "@/lib/types";
 
 /**
@@ -22,7 +25,10 @@ export function AlertSlide({
           {alert.homeTeam} × {alert.awayTeam}
         </span>
         <span className={styles.market}>
-          {alert.market} · {alert.kickoffLabel}
+          {alert.market} · {formatKickoffLabel(alert.kickoffAt)}
+        </span>
+        <span className={styles.countdown}>
+          <Countdown kickoffAt={alert.kickoffAt} />
         </span>
       </div>
 
@@ -45,6 +51,8 @@ export function AlertSlide({
           <span className={`${styles.statValue} mono`}>{formatPercent(alert.suggestedStake)}</span>
         </div>
       </div>
+
+      <p className={styles.explain}>{explainAlert(alert)}</p>
 
       {showScrollHint && (
         <div className={styles.hint}>

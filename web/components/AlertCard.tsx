@@ -1,5 +1,6 @@
 import styles from "./AlertCard.module.css";
 import { formatOdd, formatPercent } from "@/lib/format";
+import { formatKickoffLabel } from "@/lib/time";
 import type { MatchAlert } from "@/lib/types";
 
 export function AlertCard({ alert }: { alert: MatchAlert }) {
@@ -12,7 +13,7 @@ export function AlertCard({ alert }: { alert: MatchAlert }) {
           </span>
           <span className={styles.market}>{alert.market}</span>
         </div>
-        <span className={styles.kickoff}>{alert.kickoffLabel}</span>
+        <span className={styles.kickoff}>{formatKickoffLabel(alert.kickoffAt)}</span>
       </div>
 
       <div className={styles.stats}>

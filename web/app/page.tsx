@@ -8,6 +8,9 @@ import type { MatchAlert, TrackRecord } from "@/lib/types";
 // `closing_lines`, ver CLAUDE.md § "Banco de dados"). Os valores abaixo são
 // os mesmos exemplos usados no canvas de design, só pra manter a tela
 // idêntica ao que foi aprovado enquanto o backend não está ligado.
+// kickoffAt é relativo a "agora" (não fixo) pra contagem regressiva bater.
+const hoursFromNow = (h: number) => new Date(Date.now() + h * 60 * 60 * 1000).toISOString();
+
 const SAMPLE_TRACK_RECORD: TrackRecord = {
   windowLabel: "7 dias",
   avgClv: 0.0184,
@@ -19,7 +22,7 @@ const SAMPLE_ALERTS: MatchAlert[] = [
     homeTeam: "Real Sociedad",
     awayTeam: "Girona",
     league: "La Liga",
-    kickoffLabel: "21:00",
+    kickoffAt: hoursFromNow(2.5),
     market: "Escanteios · Over 9.5",
     bet365Odd: 2.05,
     fairOdd: 1.9,
@@ -31,7 +34,7 @@ const SAMPLE_ALERTS: MatchAlert[] = [
     homeTeam: "Villarreal",
     awayTeam: "Getafe",
     league: "La Liga",
-    kickoffLabel: "18:30",
+    kickoffAt: hoursFromNow(0.75),
     market: "Ambas Marcam · Sim",
     bet365Odd: 1.95,
     fairOdd: 1.83,
