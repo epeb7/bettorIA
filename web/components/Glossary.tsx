@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import styles from "./Glossary.module.css";
+import { useAnimatedOpen } from "@/lib/useAnimatedOpen";
+
+const TRANSITION_MS = 220;
 
 const TERMS = [
   {
@@ -23,7 +26,7 @@ const TERMS = [
 ];
 
 export function Glossary() {
-  const [open, setOpen] = useState(false);
+  const { open, setOpen, mounted, visible } = useAnimatedOpen(TRANSITION_MS);
 
   useEffect(() => {
     if (!open) return;
@@ -32,7 +35,7 @@ export function Glossary() {
     }
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  }, [open, setOpen]);
 
   return (
     <>
@@ -49,10 +52,13 @@ export function Glossary() {
         </svg>
       </button>
 
-      {open && (
-        <div className={styles.backdrop} onClick={() => setOpen(false)}>
+      {mounted && (
+        <div
+          className={`${styles.backdrop} ${visible ? styles.backdropOpen : ""}`}
+          onClick={() => setOpen(false)}
+        >
           <div
-            className={styles.sheet}
+            className={`${styles.sheet} ${visible ? styles.sheetOpen : ""}`}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"

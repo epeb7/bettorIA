@@ -48,4 +48,19 @@ a:hover {
 
 button {
   font-family: inherit;
+  /* toda ação de usuário responde com um leve "afundar" — o conforto
+   * tátil que faz o app parecer sólido, não travado */
+  transition: transform 120ms ease, opacity 150ms ease, background-color 150ms ease;
+}
+button:active {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+  }
+  button:active {
+    transform: none;
+  }
 }

@@ -9,6 +9,15 @@
   /* nunca encosta na borda da tela, nem atrás do entalhe/home indicator */
   padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
     max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  /* começa invisível — a classe .backdropOpen (aplicada um instante depois
+     de montar) é o que dispara a transição de entrada; ao fechar, tira a
+     classe e o fade de saída roda antes do componente desmontar de vez
+     (ver web/lib/useAnimatedOpen.ts) */
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.backdropOpen {
+  opacity: 1;
 }
 
 .sheet {
@@ -25,6 +34,25 @@
   /* dvh, não vh — no mobile a barra de endereço soma/tira altura real da
      tela, e vh puro fica errado exatamente quando ela aparece/some */
   max-height: min(560px, 85dvh);
+  /* entra "assentando": um pouco menor e mais baixo, cresce até o lugar —
+     nunca estoura na tela de uma vez */
+  opacity: 0;
+  transform: scale(0.94) translateY(10px);
+  transition: opacity 220ms ease, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sheetOpen {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .sheet {
+    transition-duration: 1ms;
+  }
+  .sheet {
+    transform: none;
+  }
 }
 
 .trigger {
