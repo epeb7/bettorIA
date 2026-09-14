@@ -73,12 +73,14 @@ export function Glossary() {
               </button>
             </div>
 
-            {TERMS.map((term) => (
-              <div key={term.name} className={styles.term}>
-                <span className={styles.termName}>{term.name}</span>
-                <span className={styles.termBody}>{term.body}</span>
-              </div>
-            ))}
+            <div className={styles.body}>
+              {TERMS.map((term) => (
+                <div key={term.name} className={styles.term}>
+                  <span className={styles.termName}>{term.name}</span>
+                  <span className={styles.termBody}>{term.body}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

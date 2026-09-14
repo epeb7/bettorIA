@@ -16,14 +16,15 @@
   max-width: 380px;
   background: var(--surface);
   border-radius: 24px;
-  padding: 24px 22px;
+  /* recorta qualquer coisa que passe da borda arredondada — inclusive a
+     barra de rolagem do .body, que sozinha NÃO acompanha o border-radius
+     do pai (é o que causava a barra "vazando" reta por cima da curva) */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 18px;
   /* dvh, não vh — no mobile a barra de endereço soma/tira altura real da
      tela, e vh puro fica errado exatamente quando ela aparece/some */
   max-height: min(560px, 85dvh);
-  overflow-y: auto;
 }
 
 .trigger {
@@ -47,6 +48,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 24px 22px 14px;
+  flex-shrink: 0;
+}
+
+.body {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 0 22px 24px;
 }
 
 .title {
