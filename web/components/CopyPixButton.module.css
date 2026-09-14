@@ -1,0 +1,31 @@
+.button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  /* padding maior que o texto precisa, de propósito: mantém a fonte
+     pequena mas garante ~44px de área de toque real */
+  padding: 13px 8px;
+  margin: -13px -8px;
+}
+
+.text {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.textShown {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text {
+    transition-duration: 1ms;
+    transform: none;
+  }
+}

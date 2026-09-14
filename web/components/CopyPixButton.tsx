@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import styles from "./CopyPixButton.module.css";
+import { useFadeOnChange } from "@/lib/useFadeOnChange";
 
 export function CopyPixButton({ payload }: { payload: string }) {
   const [copied, setCopied] = useState(false);
+  const shown = useFadeOnChange(copied);
 
   async function handleCopy() {
     try {
@@ -17,24 +20,10 @@ export function CopyPixButton({ payload }: { payload: string }) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      style={{
-        background: "none",
-        border: "none",
-        color: "var(--accent)",
-        fontSize: 13.5,
-        fontWeight: 600,
-        cursor: "pointer",
-        fontFamily: "inherit",
-        // padding maior que o texto precisa, de propósito: mantém a
-        // fonte pequena mas garante ~44px de área de toque real
-        padding: "13px 8px",
-        margin: "-13px -8px",
-      }}
-    >
-      {copied ? "Código copiado!" : "ou toque para copiar o código Pix"}
+    <button type="button" className={styles.button} onClick={handleCopy}>
+      <span className={`${styles.text} ${shown ? styles.textShown : ""}`}>
+        {copied ? "Código copiado!" : "ou toque para copiar o código Pix"}
+      </span>
     </button>
   );
 }

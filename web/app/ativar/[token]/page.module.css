@@ -27,6 +27,29 @@
   margin-bottom: 4px;
 }
 
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  /* entra de baixo pra cima, suave — mesma linguagem visual do modal
+     (ver Glossary.module.css e web/lib/useFadeOnChange.ts) */
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+.statusShown {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status {
+    transition-duration: 1ms;
+    transform: none;
+  }
+}
+
 .iconCircle {
   width: 56px;
   height: 56px;

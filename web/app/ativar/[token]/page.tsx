@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import { saveSession } from "@/lib/session";
+import { useFadeOnChange } from "@/lib/useFadeOnChange";
 
 type Status = "loading" | "success" | "already_used" | "error";
 
@@ -12,6 +13,7 @@ export default function AtivarPage({ params }: { params: Promise<{ token: string
   const router = useRouter();
   const [status, setStatus] = useState<Status>("loading");
   const [clientName, setClientName] = useState<string>("");
+  const shown = useFadeOnChange(status);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,6 +49,7 @@ export default function AtivarPage({ params }: { params: Promise<{ token: string
       <div className={styles.card}>
         <span className={styles.wordmark}>bettorIA</span>
 
+        <div className={`${styles.status} ${shown ? styles.statusShown : ""}`}>
         {status === "loading" && (
           <>
             <div className={`${styles.iconCircle} ${styles.loading}`}>
@@ -122,6 +125,7 @@ export default function AtivarPage({ params }: { params: Promise<{ token: string
             </p>
           </>
         )}
+        </div>
       </div>
     </main>
   );
