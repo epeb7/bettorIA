@@ -1,0 +1,14 @@
+{
+  "name": "bettoria",
+  "private": true,
+  "description": "Atalhos pra rodar web/ e engine/ sem precisar entrar na pasta. Cada um continua um projeto independente (ver README.md) — isto não é um workspace compartilhado.",
+  "scripts": {
+    "web:dev": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build",
+    "web:install": "npm --prefix web install",
+    "engine:test": "npm --prefix engine test",
+    "engine:discover": "npm --prefix engine run discover",
+    "engine:scan": "npm --prefix engine run scan",
+    "engine:install": "npm --prefix engine install"
+  }
+}

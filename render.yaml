@@ -1,0 +1,14 @@
+# Blueprint do Render — cron job do motor de valor.
+# ODDSPAPI_API_KEY é configurada direto no painel do Render (Environment),
+# nunca aqui no arquivo.
+services:
+  - type: cron
+    name: bettoria-scan
+    runtime: node
+    plan: free
+    schedule: "*/15 * * * *"
+    buildCommand: cd engine && npm install
+    startCommand: cd engine && npm run scan
+    envVars:
+      - key: ODDSPAPI_API_KEY
+        sync: false

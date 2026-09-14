@@ -1,0 +1,20 @@
+# dependências
+node_modules/
+.pnpm-store/
+
+# build
+dist/
+.next/
+out/
+
+# segredos — nunca comitar
+.env
+.env.local
+.env.*.local
+
+# grafo de conhecimento (gerado, reconstrua com /graphify)
+graphify-out/
+
+# sistema
+.DS_Store
+*.log

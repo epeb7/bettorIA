@@ -3,7 +3,9 @@
 ## Contexto do produto
 
 **bettor** = contexto de apostador, em português, com ênfase em análise esportiva baseada
-na casa de apostas **bet365**. O objetivo é um **agente que sugere apostas**.
+na casa de apostas **bet365**. O objetivo é um **agente que sugere apostas** — o melhor
+analista de palpites possível, com bet365 como casa de referência para apostar e
+Betfair Exchange como referência de linha justa (ver Decisões de arquitetura).
 
 - **Escopo atual: futebol apenas.** Especializar primeiro em futebol, depois expandir para
   os demais esportes da plataforma (NBA, MMA, tênis, etc.).
@@ -29,7 +31,8 @@ Ordem de entrada definida, e o motivo importa mais que a lista:
 
 1. **Forma recente** (últimos 5–6 jogos, casa/fora) — derivável do histórico da API
 2. **Retrospecto direto** (H2H) — derivável do histórico da API
-3. **Desfalques** (lesões, suspensões) — **NÃO existe na API**, ver lacunas abaixo
+3. **Desfalques** (lesões, suspensões) — **NÃO existe na API**, mitigado via `/dropping-odds`
+   (ver Lacunas reais da API)
 4. **Contexto da partida** (tabela, motivação, calendário, mando) — tabela derivável dos placares
 5. **Odds da bet365** para o mercado alvo
 
@@ -45,24 +48,29 @@ spec em https://docs.odds-api.io/api-reference/openapi.json
 - **129 mercados de futebol**, incluindo 18 de escanteios, 11 de cartões, ~20 de jogador,
   além de 1X2, dupla chance, handicap europeu, over/under, BTTS, placar exato, HT/FT,
   e estatísticas (chutes, faltas, impedimentos, desarmes).
-- `/markets` e `/bookmakers` não exigem apiKey — dá para inspecionar sem chave.
 
-### Endpoints que importam
+### Endpoints, por função
 
-| Endpoint | Uso | Custo |
-|---|---|---|
-| `/events?sport=football&league=<slug>` | **lista todos os jogos da liga** (times, ids, data, placar, bookmakerCount). Sem odds. Cap de 5000/resposta, pagina com limit+skip | 1 req por liga |
-| `/odds/multi?eventIds=<até 10>&bookmakers=<até 30>` | **odds de até 10 jogos por requisição** — sempre usar este, nunca `/odds` em loop | 1 req / 10 jogos |
-| `/odds?eventId=` | odds de 1 jogo só | evitar |
-| `/historical/events?sport&league&from&to` | **jogos passados com placar** → base para forma, H2H, médias, tabela | 1 req, cachear pra sempre |
-| `/historical/closing-lines` | linhas de fechamento, até 366 dias (temporada inteira) por sweep | backtest |
-| `/odds/movements?eventId&bookmaker&market` | movimento da linha de um mercado | diagnóstico |
-| `/dropping-odds?leagues=&minDrop=` | odds que despencaram — **proxy para notícia que não temos** (lesão, escalação) | 1 req |
-| `/value-bets?bookmaker=Bet365` | value bets prontos | 1 req |
-| `/arbitrage-bets` | arbitragem | 1 req |
+**Descobrir e cotar jogos** (o dia a dia do motor): `/events?sport=football&league=<slug>`
+lista todos os jogos da liga (times, ids, data, placar, bookmakerCount, sem odds; cap de
+5000/resposta, pagina com limit+skip) — 1 req por liga. `/odds/multi?eventIds=<até
+10>&bookmakers=<até 30>` traz odds de até 10 jogos por requisição e é o único que deve ser
+usado para isso — nunca `/odds?eventId=` em loop (1 req por jogo, evitar).
 
-Slug de liga: formato `spain-la-liga`, `england-premier-league`. Confirmar os slugs reais
-via `/leagues?sport=football` (exige apiKey).
+**Histórico e backtest**: `/historical/events?sport&league&from&to` traz jogos passados com
+placar — base para forma, H2H, médias e tabela; 1 req, cachear pra sempre.
+`/historical/closing-lines` traz linhas de fechamento de até 366 dias (temporada inteira)
+por sweep, para validar o motor contra o fechamento.
+
+**Sinais e diagnóstico**: `/odds/movements?eventId&bookmaker&market` mostra o movimento da
+linha de um mercado. `/dropping-odds?leagues=&minDrop=` lista odds que despencaram — o
+**proxy para notícia que não temos** (lesão, escalação), mitigando a lacuna de desfalques
+da API (ver abaixo). `/value-bets?bookmaker=Bet365` e `/arbitrage-bets` entregam value bets
+e arbitragem prontos, 1 req cada.
+
+**Catálogo, sem apiKey**: `/leagues?sport=football` dá os slugs reais de liga (formato
+`spain-la-liga`, `england-premier-league`); `/bookmakers` e `/markets` também não exigem
+chave. `/participants/{id}` retorna só `id`, `name`, `sport` — nenhuma estatística.
 
 ### Limites
 
@@ -84,40 +92,28 @@ Semana de pico (La Liga 10 jogos + Champions 18 = 28 jogos), varredura completa:
 
 É uma API de **cotações + resultados**, não de estatísticas de futebol. NÃO tem:
 
-- lesões, suspensões, desfalques
+- lesões, suspensões, desfalques — mitigado via `/dropping-odds`, ver acima
 - escalações
 - estatísticas de desempenho (xG, posse, chutes efetivamente dados) — atenção à pegadinha:
   existem *mercados* sobre chutes/escanteios/faltas, mas isso é odd, não o número real
 - tabela pronta (mas dá para montar dos placares)
-- `/participants/{id}` retorna só `id`, `name`, `sport` — nenhuma estatística
-
-**Mitigação para desfalques**: usar `/dropping-odds`. Queda brusca na linha ≈ o mercado
-reagiu a uma notícia que não enxergamos.
 
 ## Decisões de arquitetura
 
-- **Adaptador isolado para a fonte de odds.** Trocar de provedor depois é barato.
-- **Par de casas no free tier: `Bet365` + `Betfair Exchange`.** Bet365 é onde se aposta,
-  Betfair Exchange é a referência de linha justa para medir valor.
-
-## Correção de conclusão anterior
-
-A conversa inicial concluiu que só a **OddsPapi** serviria para modelo de valor esperado,
-por ser a única com Pinnacle. **Isso está desatualizado.** A Pinnacle realmente não está na
-Odds-API.io, mas a **Betfair Exchange está** — e exchange é referência de linha justa
-equivalente ou melhor, porque o preço vem do dinheiro real parado dos dois lados (a API
-inclusive expõe `depth*` e `lay*` no schema de odds). O modelo de EV roda inteiro na
-Odds-API.io, inclusive no plano gratuito.
-
-Mantida a decisão: **Odds-API.io**. The Odds API segue descartada (créditos por
-mercado × região, sem sharps).
+- **Odds-API.io é o provedor escolhido, com adaptador isolado** — trocar de provedor depois
+  é barato. Descartados: **The Odds API** (créditos por mercado × região, sem sharps) e
+  **OddsPapi** (só ganharia se a Pinnacle fosse essencial pra medir valor — e não é, ver
+  abaixo).
+- **Par de casas no free tier: `Bet365` + `Betfair Exchange`.** Bet365 é onde se aposta;
+  Betfair Exchange é a referência de linha justa pra medir valor, e serve tão bem quanto a
+  Pinnacle (que a Odds-API.io não tem) — o preço vem do dinheiro real dos dois lados (a API
+  expõe `depth*` e `lay*` no schema de odds). O modelo de EV roda inteiro aqui, inclusive no
+  plano gratuito. *(Corrige a conclusão inicial da conversa, que dependia da Pinnacle e
+  ficou desatualizada.)*
 
 ## Estado atual
 
 Sem código ainda. Fase de definição de contexto, escolha de provedor e escopo de ligas.
-
-Nota técnica explicando a API para público não-técnico:
-https://claude.ai/code/artifact/07e81101-8453-4ab2-92ea-03eff3e68564
 
 ---
 
@@ -126,14 +122,20 @@ https://claude.ai/code/artifact/07e81101-8453-4ab2-92ea-03eff3e68564
 Modelo de negócio: grupo de WhatsApp com clientes já ativos; o agente será vendido como
 assinatura para aumentar a arrecadação mensal.
 
-**Fase 1 (atual): fechada, só 2 usuários.** Objetivo da fase NÃO é lucro — é acumular
-**100 alertas com CLV medido** antes de abrir cobrança.
+**Fase de validação (atual, = Fase 0 do plano de lançamento): fechada, só 2 usuários.**
+Objetivo da fase NÃO é lucro — é acumular **100 alertas com CLV medido** antes de abrir
+cobrança.
 
 ### Tese central do motor
 
 O edge **não vem de prever futebol melhor**. Vem de **comparar preços**: a bet365 contra o
 consenso sem margem das outras 282 casas. Isso funciona na semana 1, sem modelo treinado,
-sem histórico.
+sem histórico. A intuição sobre escanteios/faltas/cartões confirma essa tese: mercado
+principal recebe o dinheiro e a atenção, o secundário é precificado mecanicamente —
+simulação de 912 preços achou 0,4% de EV>3% no principal contra 13,7% no secundário
+(**~31× mais oportunidades**, EV médio maior; simulação do mecanismo, não medição —
+confirmar com dados reais). **Consequência prática: varrer os 129 mercados, mas alertar
+quase só nos secundários.**
 
 ### Matemática do motor (cálculos executados, ver artifact)
 
@@ -141,7 +143,9 @@ sem histórico.
 overround       = Σ (1/odd_i) − 1                    # bet365 típico: 3,91%
 p_justa(i)      = (1/odd_i) / Σ(1/odd_j)             # normalização proporcional
 EV              = p_justa × (odd_b365 − 1) − (1 − p_justa)
-Kelly           f* = EV / (odd − 1)   → usar f*/4
+Kelly           f* = EV / (odd − 1)   → usar f*/4     # Kelly ¼ sempre: EV+5% → stake 1,30%
+                                                        # da banca, não 10%. Kelly cheio
+                                                        # quebra quando a prob. é estimada.
 CLV             = (odd_pega / odd_justa_fechamento) − 1
 tamanho amostra n = (z·σ / ROI)²
 ```
@@ -152,25 +156,12 @@ tamanho amostra n = (z·σ / ROI)²
   Um par de lambdas gera todos os mercados de gols coerentes entre si.
 - **Escanteios/cartões**: superdispersos (variância ≈ 1,42× a média). **Poisson erra por
   construção** — até 4,09 pp na linha de 8.5. Usar **binomial negativa**.
-
-### Descobertas que orientam o produto
-
-1. **A intuição sobre escanteios/faltas/cartões está matematicamente certa.** Mercado
-   principal recebe o dinheiro e a atenção; secundário é precificado mecanicamente. Simulação
-   de 912 preços: 0,4% dos preços principais passam de EV>3%, contra 13,7% nos secundários —
-   **~31× mais oportunidades, com EV médio maior**. (Simulação do mecanismo, não medição;
-   confirmar com dados reais.)
-   → **Varrer os 129 mercados, mas alertar quase só nos secundários.**
-
-2. **CLV é a métrica que viabiliza o negócio.** Provar ROI de 3% a odd 1.90 exige **3.825
-   apostas** (95% conf.) — 3,7 anos a 20 alertas/semana. Provar CLV de 1,5% exige **35
-   apostas** — 2 semanas. **~111× mais rápido**, e não depende de nenhuma aposta ter ganhado.
-   - CLV+ com ROI− em 100 apostas = azar, motor certo.
-   - CLV− com ROI+ = sorte, motor errado (mesmo com o grupo comemorando).
-   - Sem CLV não dá para distinguir, e o produto seria calibrado por ruído.
-
-3. **Kelly ¼ sempre.** EV de +5% → stake de **1,30% da banca**, não 10%. Kelly cheio quebra
-   quando a probabilidade é estimada.
+- **CLV é a métrica que viabiliza o negócio.** Provar ROI de 3% a odd 1.90 exige **3.825
+  apostas** (95% conf.) — 3,7 anos a 20 alertas/semana. Provar CLV de 1,5% exige **35
+  apostas** — 2 semanas. **~111× mais rápido**, e não depende de nenhuma aposta ter ganhado.
+  CLV+ com ROI− em 100 apostas = azar, motor certo; CLV− com ROI+ = sorte, motor errado
+  (mesmo com o grupo comemorando). Sem CLV não dá para distinguir, e o produto seria
+  calibrado por ruído.
 
 ### Regra invariável de operação
 
@@ -186,9 +177,6 @@ o motor, nem para quem paga assinatura.
 | 1 — Consenso sem vig | Semana 1 | bet365 vs consenso normalizado. Aritmética pura, opera sozinha. |
 | 2 — Modelo próprio | Mês 2 | Dixon-Coles (gols) + binomial negativa (escanteios/cartões). Exige fonte de escanteios/cartões **efetivamente ocorridos** — a API não tem. |
 | 3 — Sinal de movimento | Contínua | `/dropping-odds` como alerta e como freio (EV+ pode ser informação velha). |
-
-Nota técnica com a matemática completa:
-https://claude.ai/code/artifact/d9ee0a47-3f70-4fc5-99f1-f65d37728fa2
 
 ---
 
@@ -210,7 +198,7 @@ Fluxo: número → código de 6 dígitos **via WhatsApp** (não SMS — reaprove
 os clientes já confiam e que o produto já vai usar pra entregar alerta) → sessão sem senha.
 
 **Requisito estrutural não-opcional**: migrar do grupo de WhatsApp comum para **envio
-individual via WhatsApp Business Platform** (Meta Cloud API, via BSP como 360dialog ou
+individual via WhatsApp Business Platform** (Meta Cloud API, via um BSP — ex.: 360dialog ou
 Blip). Um grupo tradicional não segura produto pago — não dá pra cobrar de uns e cortar
 acesso de outros dentro do mesmo grupo em escala.
 
@@ -264,5 +252,134 @@ e é mais caro que qualquer bug de login.
 Business Platform + hospedagem) ~R$500-1.500/mês — ordem de grandeza, confirmar com
 provedor escolhido.
 
-Plano completo com todos os fluxos e a opinião de sócio sobre risco de reputação em escala:
-https://claude.ai/code/artifact/dbe17fe6-f30f-47bd-883f-92d999a127d9
+---
+
+## Artifacts publicados
+
+- Nota técnica explicando a API para público não-técnico:
+  https://claude.ai/code/artifact/07e81101-8453-4ab2-92ea-03eff3e68564
+- Nota técnica com a matemática completa do motor:
+  https://claude.ai/code/artifact/d9ee0a47-3f70-4fc5-99f1-f65d37728fa2
+- Plano de lançamento completo, com todos os fluxos e a opinião de sócio sobre risco de
+  reputação em escala:
+  https://claude.ai/code/artifact/dbe17fe6-f30f-47bd-883f-92d999a127d9
+
+---
+
+## Arquitetura do produto (web, mobile-first)
+
+### Fonte de dados adicional: estatísticas reais (além de odds)
+
+A Odds-API.io cobre odds + resultados, mas não tem lesões/escalação/tabela pronta
+(ver Lacunas reais da API). Preenchendo essa lacuna:
+
+- **API-Football (api-sports.io)** — verificado via busca (fontes de comparação de
+  terceiros, não a doc oficial direto — **confirmar com chave de teste antes de travar
+  arquitetura nisso**, é grátis). Free tier: **100 req/dia**, cobre temporada atual,
+  todos os endpoints liberados sem cartão — **lesões, escalação, classificação,
+  estatísticas de jogador/time, predictions**. É exatamente o que falta.
+- Como 100 req/dia é justo, usar só para dados que mudam pouco: 1x/dia por liga pra
+  tabela + lesões dos times que jogam na semana. Não usar para odds (isso já é a
+  Odds-API.io).
+- Alternativas verificadas: **football-data.org** (10 req/min, 12 competições, só
+  fixtures/resultados/tabela — sem lesões, mais simples e mais liberal em request/min,
+  serve como fallback de tabela se API-Football estourar); **TheSportsDB** (grátis mas
+  free tier foi ficando mais restrito ao longo dos anos por abuso — não confiar como
+  fonte primária).
+
+### Stack (tudo com camada grátis)
+
+| Peça | Escolha | Por quê |
+|---|---|---|
+| Frontend | Next.js (React), mobile-first PWA | Prioridade explícita é desempenho mobile |
+| Hosting frontend | Cloudflare Pages ou Vercel (free) | Grátis, edge, rápido |
+| Cron do motor (busca odds a cada 15min) | Cloudflare Workers + Cron Triggers | Grátis, serverless, já mapeado no orçamento de requisições |
+| Banco de dados | **Supabase (Postgres)** | Modelo relacional rico necessário pra cruzar apostas entre usuários (ver schema abaixo); free tier + editor de tabela amigável, útil pra conciliação manual do Pix |
+| LLM da camada de chat | **Claude Haiku 4.5** | Tarefa é "explicar dado já calculado", não raciocínio complexo — mais barato, ordem de grandeza R$500-1.500/mês em uso moderado (ver Skill claude-api) |
+| Auth | Custom: link de ativação único + segredo de dispositivo (ver Plano de lançamento) | Já decidido — sem senha, sem WhatsApp Business API |
+
+### Banco de dados — schema pra cruzar contexto entre usuários
+
+O pedido central é: guardar contexto o bastante pra IA calcular, e cruzar palpites de
+diferentes usuários (não só alertas do motor). Tabelas principais:
+
+- `teams` (id, nome, liga, ids externos pra casar Odds-API.io + API-Football)
+- `matches` (id, times, liga, data, status, placar, id externo Odds-API.io)
+- `odds_snapshots` (match_id, casa, mercado, linha, odd, capturado_em) — série temporal
+- `team_stats_external` (team_id, fonte='api-football', lesões[], escalação_última,
+  posição_tabela, pontos, forma) — cache diário
+- `computed_probabilities` (match_id, mercado, p_justa, EV, kelly_stake, versão_modelo,
+  calculado_em) — saída do motor (Camada 1/2)
+- `alerts` (id, match_id, mercado, odd_pega, casa, EV, stake_sugerido, enviado_em)
+- `closing_lines` (alert_id, odd_justa_fechamento, CLV, capturado_em)
+- `users` (id, hash_do_celular, segredo_dispositivo, status_assinatura)
+- `user_picks` (id, user_id, alert_id ou mercado_livre, stake_real, colocado_em,
+  resultado, pnl) — **isso é o que permite cruzar apostas entre usuários**: cada
+  usuário loga o que realmente apostou, não só o que o motor sugeriu
+- `user_pick_aggregates` (view materializada: família_mercado, CLV_médio, taxa_acerto,
+  n_picks) — agregado entre TODOS os usuários por família de mercado
+
+Consequência direta da matemática já estabelecida: mais usuários registrando picks =
+convergência mais rápida pra provar CLV (o `n` da fórmula de tamanho de amostra não se
+importa de quem vieram as apostas, só quantas são). Cruzar dados entre usuários
+**acelera a validação do motor**, não é só relatório bonito.
+
+### Interface — em desenho
+
+Ver canvas de design publicado (3 direções visuais em avaliação: Terminal escuro estilo
+mesa de operação, Fintech claro estilo app de banco, Editorial esportivo escuro e vívido)
+— link a confirmar após escolha da direção.
+
+---
+
+## MUDANÇA DE PROVEDOR: Odds-API.io → odds-api.net
+
+**Odds-API.io descartada em 2026-09-14**: cadastro de chave grátis nova pausado
+indefinidamente ("New free API keys are paused indefinitely" — confirmado ao vivo no
+site). A API em si segue no ar (endpoints sem chave respondem), só não aceita cliente
+novo grátis. Planos pagos existem (Solo £49/mês, 2 casas) mas ficou ambíguo se Betfair
+Exchange conta como "sharp/exchange book" que exigiria tier mais alto — não confirmado,
+não vale mais o esforço dado que achamos alternativa melhor.
+
+### Candidatos avaliados e descartados (nessa ordem, todos verificados ao vivo)
+
+| Provedor | Motivo do descarte |
+|---|---|
+| The Odds API (the-odds-api.com) | Bet365 só cobre Austrália (AFL/NRL) — zero futebol europeu. Sem Pinnacle, sem Betfair Exchange. |
+| SportsGameOdds | Bet365 e Pinnacle só em planos pagos; free tier só tem casas americanas mainstream (FanDuel, DraftKings...). |
+| OddsPapi | Bet365+Pinnacle+Betfair Exchange confirmados, mas free tier tem calculadora de preço dinâmica que não expôs limite claro — não descartada por defeito, só não investigada até o fim porque o `odds-api.net` resolveu primeiro. |
+
+### Provedor escolhido: odds-api.net
+
+- **Sem free tier** (confirmado — página de marketing estava certa; um README do GitHub
+  deles que dizia "chave grátis disponível" estava desatualizado/errado).
+- **Plano Starter: $30/mês, 50.000 requisições/mês.** Nosso uso real é ~5-7 req por
+  varredura; mesmo a cada 15min o dia inteiro não passa de ~700/dia (~21k/mês) — sobra
+  banda.
+- **Bet365 + Pinnacle + Betfair Exchange confirmados juntos** no mesmo request (melhor
+  que a Odds-API.io, que não tinha Pinnacle).
+- **Cobertura de futebol global confirmada**: Premier League, Serie A, Champions League
+  listadas; 45+ ligas, EPL com 36 casas.
+- Base URL: `https://api.odds-api.net/v1`, header `X-API-Key`. Todo endpoint exige
+  credencial (não tem `/bookmakers` ou `/sports` público sem chave, diferente da
+  Odds-API.io).
+- Tem SDKs TypeScript/Python, modo mock (`ODDS_API_MOCK=1`) pra desenvolver sem gastar
+  requisição, e um MCP server pra agente de código — vale usar durante o desenvolvimento.
+
+### Licenciamento — já resolvido, essa é a diferença importante
+
+Termos de uso **permitem explicitamente** derivative outputs: *"analytics, scores,
+rankings, **alerts**, models, reports, charts, **dashboards**, historical studies, and
+transformed content."* Só proíbem redistribuir o feed bruto como produto concorrente
+("reconstruct, expose, resell, or distribute the raw API data or a competing feed").
+Isso é exatamente nosso caso de uso (mostrar alerta calculado, não revender odd crua) —
+**resolve a questão que ficou em aberto com a Odds-API.io** sem precisar de e-mail de
+autorização.
+
+### Próximo passo
+
+Cadastrar conta paga no `odds-api.net`, gerar chave, confirmar bookmaker names reais
+(formato pode diferir de "Bet365"/"Betfair Exchange" como na Odds-API.io) e remapear os
+endpoints já documentados (`/events`, `/odds/multi` etc. eram nomes da Odds-API.io —
+odds-api.net usa `/v1/sports`, `/v1/bookmakers`, e provavelmente nomes de endpoint
+próprios a confirmar na doc real após ter a chave).
