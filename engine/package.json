@@ -5,6 +5,7 @@
   "description": "Motor de valor do bettorIA — adaptador OddsPapi + cálculo de EV/Kelly/CLV. Deploy: Render (cron job).",
   "scripts": {
     "discover": "tsx src/jobs/discover.ts",
+    "generate-link": "tsx src/jobs/generate-link.ts",
     "scan": "tsx src/jobs/scan.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

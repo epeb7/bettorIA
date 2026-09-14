@@ -12,6 +12,10 @@ out/
 .env.local
 .env.*.local
 
+# dados locais com PII (telefone de cliente) — o FileTokenStore de dev
+# grava aqui; nunca sobe pro Git, é só um placeholder até existir Supabase
+engine/data/
+
 # grafo de conhecimento (gerado, reconstrua com /graphify)
 graphify-out/
 

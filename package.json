@@ -8,6 +8,7 @@
     "web:install": "npm --prefix web install",
     "engine:test": "npm --prefix engine test",
     "engine:discover": "npm --prefix engine run discover",
+    "engine:generate-link": "npm --prefix engine run generate-link --",
     "engine:scan": "npm --prefix engine run scan",
     "engine:install": "npm --prefix engine install"
   }

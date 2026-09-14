@@ -383,3 +383,47 @@ Cadastrar conta paga no `odds-api.net`, gerar chave, confirmar bookmaker names r
 endpoints já documentados (`/events`, `/odds/multi` etc. eram nomes da Odds-API.io —
 odds-api.net usa `/v1/sports`, `/v1/bookmakers`, e provavelmente nomes de endpoint
 próprios a confirmar na doc real após ter a chave).
+
+---
+
+## Implementado: token de ativação (Pix → login por celular)
+
+Fecha o fluxo entre "Cobrança — Pix manual com centavo único" e
+"Autenticação por celular" (ambos já documentados acima), **gratuito** —
+nenhuma peça exige serviço pago.
+
+### Fluxo
+
+1. Cliente paga o valor com centavo único combinado (Pix — mesma chave
+   estática sempre, o centavo identifica quem pagou).
+2. Você confere no app do banco (grátis) que o valor bateu.
+3. Roda `npm run engine:generate-link -- --phone "+55..." --name "Fulano" --amount 4937`
+   (centavos) — gera um token de ativação de uso único.
+4. Cola o link impresso na conversa do WhatsApp com o cliente (grátis, sem
+   API de negócio).
+5. Cliente clica no link **no celular dele** — primeiro dispositivo a abrir
+   consome o token (uso único, ver regra de anti-compartilhamento já
+   documentada). Isso é o "login por número de celular": o telefone já é
+   conhecido desde a geração do token, não precisa de OTP separado.
+
+### Código
+
+- `engine/src/auth/token.ts` — geração (192 bits, `crypto.randomBytes`) e
+  consumo de uso único. 100% função pura, testada.
+- `engine/src/auth/store.ts` — interface `TokenStore` trocável (mesmo
+  princípio do adaptador da OddsPapi). `FileTokenStore` é só pra rodar hoje,
+  local, sem banco — **não é pra produção** (arquivo não aguenta concorrência
+  nem sobrevive a ambiente serverless). Trocar por `SupabaseTokenStore`
+  quando o banco existir, implementando a mesma interface.
+- `engine/src/jobs/generate-link.ts` — o "painel admin" em forma de comando.
+- `engine/src/auth/token.test.ts` — 13 testes no total do engine agora,
+  incluindo a regra crítica: segundo consumo do mesmo token falha.
+
+### O que falta pra produção (fora do escopo de hoje)
+
+- Rota HTTP `/ativar/<token>` que de fato gera o segredo de dispositivo no
+  navegador do cliente (hoje só existe a geração do token, não a ativação
+  em si — precisa do Next.js com API route + Supabase).
+  PIN a cada 5 dias e limite de 2 dispositivos (já desenhados, não
+  implementados).
+- `SupabaseTokenStore` no lugar do `FileTokenStore`.
