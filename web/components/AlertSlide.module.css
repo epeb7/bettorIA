@@ -3,12 +3,38 @@
   scroll-snap-align: start;
   scroll-snap-stop: always;
   flex-shrink: 0;
+  /* grid de 2 linhas, não flex+justify-content:center — linhas de grid
+     NUNCA se sobrepõem. Linha 1 (1fr) leva o conteúdo, centralizado
+     dentro da própria linha; linha 2 (auto) é a dica de rolagem, do
+     tamanho exato que ela precisa. Antes a dica era position:absolute
+     num ponto fixo, e sobrepunha o texto em janelas largas-e-baixas
+     (desktop) onde o conteúdo "centralizado" cresce além do espaço
+     realmente livre. */
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: 28px 28px 14px;
+}
+
+.content {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 24px;
+  min-height: 0;
+  /* CRÍTICO: grid só garante que as TRILHAS não se sobrepõem — o
+     CONTEÚDO de uma célula ainda pode vazar pra célula vizinha se ele
+     mesmo não tiver overflow definido. min-height:0 sozinho não recorta
+     nada, só permite encolher; overflow-y é quem realmente evita o
+     vazamento. */
+  overflow-y: auto;
+  /* "safe center": centraliza quando cabe; quando NÃO cabe, vira
+     flex-start (alinha ao topo) em vez de cortar as duas pontas do
+     conteúdo igualmente — sem isso, numa janela baixa, o nome do time
+     lá em cima sumia tanto quanto o fim do texto lá embaixo. A
+     declaração sem "safe" antes é o fallback pra navegador muito
+     antigo que não reconhece a palavra-chave. */
   justify-content: center;
-  gap: 28px;
-  padding: 32px 28px;
+  justify-content: safe center;
 }
 
 .matchInfo {
@@ -106,8 +132,10 @@
 }
 
 .hint {
-  position: absolute;
-  bottom: 18px;
+  /* item de grid normal agora — sempre logo abaixo do conteúdo, nunca
+     sobrepondo nada */
+  justify-self: center;
+  padding-top: 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
