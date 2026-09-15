@@ -22,6 +22,54 @@ const EARLY_SEASON_NOTE: Record<string, string> = {
   "la-liga": "A temporada está no início — o histórico cresce jogo a jogo.",
 };
 
+interface RoundGroup {
+  key: string;
+  league: string;
+  round: number;
+  alerts: HistoricalAlert[];
+  latestSettledAt: string;
+}
+
+/**
+ * O torcedor não pensa em "meus últimos 6 alertas", pensa em "rodada 24
+ * do Brasileirão" — é assim que o calendário do futebol organiza a cabeça
+ * de quem acompanha. Cada rodada numera dentro da própria liga (ver
+ * HistoricalAlert.round), então a chave de agrupamento é sempre liga+rodada,
+ * nunca só um dos dois — senão "rodada 5" da La Liga se misturaria com
+ * "rodada 5" do Brasileirão, que não têm nenhuma relação entre si.
+ *
+ * Os grupos saem ordenados pelo alerta mais recente de cada um — não por
+ * número de rodada — porque com "Todos" selecionado isso intercala as
+ * ligas na ordem em que os jogos realmente aconteceram, em vez de
+ * empilhar uma liga inteira antes da outra começar.
+ */
+function groupByRound(alerts: HistoricalAlert[]): RoundGroup[] {
+  const groups = new Map<string, RoundGroup>();
+
+  for (const alert of alerts) {
+    const key = `${alert.league}__${alert.round}`;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.alerts.push(alert);
+      if (alert.settledAt > existing.latestSettledAt) {
+        existing.latestSettledAt = alert.settledAt;
+      }
+    } else {
+      groups.set(key, {
+        key,
+        league: alert.league,
+        round: alert.round,
+        alerts: [alert],
+        latestSettledAt: alert.settledAt,
+      });
+    }
+  }
+
+  return [...groups.values()].sort((a, b) =>
+    a.latestSettledAt < b.latestSettledAt ? 1 : -1
+  );
+}
+
 export function HistoryList({
   alerts,
   leagues,
@@ -38,6 +86,11 @@ export function HistoryList({
     if (!league) return alerts;
     return alerts.filter((a) => a.league === league.label);
   }, [alerts, leagues, selected]);
+
+  // com um campeonato específico filtrado, a liga já está implícita no
+  // chip ativo — repeti-la em cada cabeçalho de rodada seria ruído.
+  const showLeagueInHeader = selected === ALL;
+  const grouped = useMemo(() => groupByRound(filtered), [filtered]);
 
   return (
     <>
@@ -71,8 +124,20 @@ export function HistoryList({
         </div>
       ) : (
         <div className={`${styles.list} ${shown ? styles.listShown : ""}`}>
-          {filtered.map((alert) => (
-            <HistoryCard key={alert.id} alert={alert} />
+          {grouped.map((group) => (
+            <section key={group.key} className={styles.roundGroup}>
+              <div className={styles.roundHeader}>
+                <span className={styles.roundLabel}>
+                  {showLeagueInHeader ? `${group.league} · Rodada ${group.round}` : `Rodada ${group.round}`}
+                </span>
+                <span className={styles.roundRule} />
+              </div>
+              <div className={styles.roundCards}>
+                {group.alerts.map((alert) => (
+                  <HistoryCard key={alert.id} alert={alert} />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       )}

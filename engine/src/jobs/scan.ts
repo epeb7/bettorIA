@@ -10,6 +10,15 @@
  * placeholder — a forma exata do JSON de mercados da OddsPapi só é conhecida
  * depois de rodar discover.ts e ver uma resposta real. Não subir pro cron do
  * Render antes de confirmar isso com uma chamada de teste.
+ *
+ * PRINCÍPIO DE REQUISIÇÃO — uma chamada, vários palpites: `getOddsByTournaments`
+ * já recebe uma LISTA de tournamentIds e devolve todos os jogos numa resposta
+ * só (ver adapters/oddspapi.ts). O loop abaixo é por LIGA, nunca por JOGO —
+ * calcular EV pra cada mercado de cada fixture acontece depois, em memória,
+ * sobre a resposta já baixada. Isso é o que faz o orçamento de requisição do
+ * CLAUDE.md fechar (5 requisições cobrem 28 jogos + todos os mercados deles).
+ * Se algum dia parecer necessário chamar a API dentro do loop de fixtures,
+ * é sinal de bug, não de feature — voltar e batchear.
  */
 import { oddsPapiFromEnv, type OddsPapiFixture } from "../adapters/oddspapi";
 import { evaluateMarket, type OddsSide } from "../engine/math";

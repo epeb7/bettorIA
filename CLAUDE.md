@@ -295,8 +295,25 @@ A Odds-API.io cobre odds + resultados, mas não tem lesões/escalação/tabela p
 | Hosting frontend | Cloudflare Pages ou Vercel (free) | Grátis, edge, rápido |
 | Cron do motor (busca odds a cada 15min) | Cloudflare Workers + Cron Triggers | Grátis, serverless, já mapeado no orçamento de requisições |
 | Banco de dados | **Supabase (Postgres)** | Modelo relacional rico necessário pra cruzar apostas entre usuários (ver schema abaixo); free tier + editor de tabela amigável, útil pra conciliação manual do Pix |
-| LLM da camada de chat | **Claude Haiku 4.5** | Tarefa é "explicar dado já calculado", não raciocínio complexo — mais barato, ordem de grandeza R$500-1.500/mês em uso moderado (ver Skill claude-api) |
+| LLM da camada de chat | **Claude Haiku 4.5, direto via API da Anthropic** | Tarefa é "explicar dado já calculado", não raciocínio complexo — mais barato, ordem de grandeza R$500-1.500/mês em uso moderado (ver Skill claude-api) |
 | Auth | Custom: link de ativação único + segredo de dispositivo (ver Plano de lançamento) | Já decidido — sem senha, sem WhatsApp Business API |
+
+### Decisão revisitada: por que não Groq nem OpenRouter
+
+Reconsiderado em 2026-09-14 depois de pergunta direta — **mantido: Anthropic direto**.
+
+- **Groq não serve Claude.** É hardware próprio (LPU) hospedando modelos abertos
+  (Llama, Mixtral, GPT-OSS etc.) — trocar pra Groq significa abandonar Claude no chat,
+  não só trocar de "encanamento". Ganho real é velocidade de token/s, que não importa
+  aqui: é um chat de ~500 usuários, não um produto de latência crítica.
+- **OpenRouter serve Claude, mas como proxy** — mesma Anthropic por trás, com uma taxa
+  de intermediação em cima e mais um salto de rede. A vantagem dele é trocar de modelo
+  sem mudar código (útil com *múltiplos* modelos em jogo). Sem essa necessidade agora,
+  ele só soma latência, custo e mais um ponto de falha, sem ganhar nada — o inverso de
+  "mais simples": um SDK oficial (`@anthropic-ai/sdk`) e uma chave é o caminho com menos
+  peça, não mais.
+- Revisitar OpenRouter **se e quando** surgir necessidade real de multi-modelo (ex:
+  fallback de custo, ou comparar Claude com outro modelo em produção) — não antes.
 
 ### Banco de dados — schema pra cruzar contexto entre usuários
 
@@ -439,3 +456,32 @@ tem gente de confiança direta acessando.
 
 **Isso precisa voltar à mesa antes da Fase 2** (30-50 clientes que o usuário não conhece
 pessoalmente) — aviso verbal não escala pra gente desconhecida. Não esquecer.
+
+---
+
+## Decisão: /historico agrupado por rodada, não lista cronológica
+
+Mudança de 2026-09-14, a pedido do usuário: o torcedor pensa em "rodada 24 do
+Brasileirão", não em "meus últimos 6 alertas". A tela de histórico foi de uma lista
+cronológica plana pra seções agrupadas por **liga + rodada** (`HistoricalAlert.round`
+em `web/lib/types.ts`, lógica de agrupamento `groupByRound` em
+`web/components/HistoryList.tsx`).
+
+- **Chave de agrupamento é sempre liga+rodada, nunca só rodada** — cada campeonato
+  numera do zero, "rodada 5" da La Liga não tem relação com "rodada 5" do Brasileirão.
+- **Grupos ordenados pelo alerta mais recente de cada um**, não por número de rodada —
+  com o filtro "Todos" isso intercala as ligas na ordem real dos jogos, em vez de
+  empilhar uma liga inteira antes da próxima aparecer.
+- Com uma liga específica filtrada, o cabeçalho de cada seção omite o nome da liga
+  (já está implícito no chip ativo) e mostra só "Rodada N".
+- Verificado visualmente (Playwright, Chromium + Firefox, mobile 390×844 + desktop
+  1366×650, incluindo a interação de clicar num filtro) antes de considerar fechado —
+  ver seção sobre disciplina de teste mais acima.
+
+### Princípio do motor: uma requisição gera vários alertas
+
+Confirmado (já era assim, reforçado em comentário no código): `getOddsByTournaments`
+recebe uma lista de `tournamentIds` e devolve todos os jogos numa resposta só; o loop
+de `runScan()` é por liga, nunca por jogo — o cálculo de EV por mercado acontece depois,
+em memória, sobre a resposta já baixada (ver `engine/src/jobs/scan.ts`). Se algum dia
+parecer necessário chamar a API dentro de um loop de fixtures, é sinal de bug.

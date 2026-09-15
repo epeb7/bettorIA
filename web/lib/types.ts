@@ -44,4 +44,13 @@ export interface HistoricalAlert {
   oddTaken: number;
   clv: number; // pode ser negativo — mostrar sempre, nunca esconder
   outcome: "won" | "lost" | "void";
+  /**
+   * Rodada/jornada do campeonato — é como o torcedor pensa o calendário,
+   * não em "últimos N dias" (ver HistoryList.tsx, agrupamento por rodada).
+   * Cada liga numera do zero (La Liga na rodada 5 ≠ Brasileirão na rodada
+   * 5), por isso o agrupamento sempre combina liga + rodada, nunca só um
+   * dos dois. Setembro é o instantâneo certo pra provar isso: europeias
+   * mal começaram (rodada baixa), Brasileirão está no meio (rodada alta).
+   */
+  round: number;
 }

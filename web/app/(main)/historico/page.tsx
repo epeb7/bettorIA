@@ -34,6 +34,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 2.1,
     clv: 0.058,
     outcome: "won",
+    round: 5,
   },
   {
     id: "h2",
@@ -45,6 +46,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 1.92,
     clv: 0.034,
     outcome: "lost",
+    round: 5,
   },
   {
     id: "h3",
@@ -56,6 +58,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 2.35,
     clv: -0.008,
     outcome: "won",
+    round: 4,
   },
   {
     id: "h4",
@@ -67,6 +70,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 1.78,
     clv: -0.012,
     outcome: "lost",
+    round: 4,
   },
   {
     id: "h5",
@@ -78,6 +82,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 1.95,
     clv: 0.0,
     outcome: "void",
+    round: 3,
   },
   {
     id: "h6",
@@ -89,6 +94,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 1.85,
     clv: 0.021,
     outcome: "won",
+    round: 3,
   },
   // Brasileirão — temporada no meio do ano, histórico mais rico
   {
@@ -101,6 +107,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 1.98,
     clv: 0.041,
     outcome: "won",
+    round: 24,
   },
   {
     id: "b2",
@@ -112,6 +119,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 1.87,
     clv: 0.027,
     outcome: "won",
+    round: 24,
   },
   {
     id: "b3",
@@ -123,6 +131,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 2.05,
     clv: -0.015,
     outcome: "lost",
+    round: 23,
   },
   {
     id: "b4",
@@ -134,6 +143,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 3.1,
     clv: 0.062,
     outcome: "lost",
+    round: 23,
   },
   {
     id: "b5",
@@ -145,6 +155,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 1.91,
     clv: 0.018,
     outcome: "won",
+    round: 22,
   },
   {
     id: "b6",
@@ -156,6 +167,7 @@ const SAMPLE_HISTORY: HistoricalAlert[] = [
     oddTaken: 2.0,
     clv: -0.006,
     outcome: "won",
+    round: 21,
   },
 ];
 

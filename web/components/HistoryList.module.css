@@ -1,8 +1,8 @@
 .filters {
   display: flex;
-  gap: 8px;
+  gap: clamp(6px, 1.6vw, 8px);
   overflow-x: auto;
-  padding: 0 22px;
+  padding: 0 clamp(16px, 5vw, 22px);
   /* CRÍTICO: um item flex com overflow diferente de "visible" tem altura
      mínima automática = 0 (regra real do CSS flexbox). Sem flex-shrink:0,
      quando a lista abaixo é grande e o espaço aperta, o flexbox espreme
@@ -18,13 +18,13 @@
 }
 
 .chip {
-  font-size: 12.5px;
+  font-size: clamp(11.5px, 2.8vw, 12.5px);
   font-weight: 600;
   color: var(--muted);
   background: var(--surface-2);
   border: none;
   border-radius: 100px;
-  padding: 8px 14px;
+  padding: clamp(7px, 1.8vw, 8px) clamp(12px, 3.2vw, 14px);
   white-space: nowrap;
   cursor: pointer;
   font-family: inherit;
@@ -39,8 +39,11 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 0 22px;
+  /* espaço entre rodadas — maior que o espaço entre cards de uma mesma
+     rodada (.roundCards), pra separação visual clara de "isso aqui é um
+     capítulo novo" (ver groupByRound em HistoryList.tsx) */
+  gap: clamp(18px, 4.5vw, 26px);
+  padding: 0 clamp(16px, 5vw, 22px);
   /* entra com fade leve toda vez que o filtro muda — mesma linguagem do
      resto do app (ver web/lib/useFadeOnChange.ts) */
   opacity: 0;
@@ -52,9 +55,42 @@
   transform: translateY(0);
 }
 
+.roundGroup {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 10px);
+}
+
+.roundHeader {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 2.5vw, 12px);
+}
+
+.roundLabel {
+  font-size: clamp(11px, 2.6vw, 12.5px);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.roundRule {
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+.roundCards {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 10px);
+}
+
 .empty {
-  margin: 8px 22px 0;
-  padding: 22px 20px;
+  margin: clamp(6px, 1.5vw, 8px) clamp(16px, 5vw, 22px) 0;
+  padding: clamp(18px, 4.5vw, 22px) clamp(16px, 4vw, 20px);
   background: var(--surface-2);
   border-radius: 16px;
   display: flex;
@@ -64,12 +100,12 @@
 }
 
 .emptyTitle {
-  font-size: 14px;
+  font-size: clamp(13px, 3.2vw, 14px);
   font-weight: 700;
 }
 
 .emptyBody {
-  font-size: 13px;
+  font-size: clamp(12px, 2.9vw, 13px);
   color: var(--muted);
   line-height: 1.5;
 }
