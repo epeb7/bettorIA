@@ -14,6 +14,8 @@ const hoursFromNow = (h: number) => new Date(Date.now() + h * 60 * 60 * 1000).to
 const SAMPLE_TRACK_RECORD: TrackRecord = {
   windowLabel: "7 dias",
   avgClv: 0.0184,
+  n: 12,
+  winRate: 0.5,
 };
 
 const SAMPLE_ALERTS: MatchAlert[] = [

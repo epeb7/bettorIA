@@ -21,6 +21,19 @@ export function formatKickoffLabel(kickoffAt: string, now: Date = new Date()): s
   return `${kickoff.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} ${time}`;
 }
 
+export function formatPastDate(dateAt: string, now: Date = new Date()): string {
+  const date = new Date(dateAt);
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.round(
+    (startOfDay(now).getTime() - startOfDay(date).getTime()) / 86_400_000
+  );
+
+  if (diffDays === 0) return "hoje";
+  if (diffDays === 1) return "ontem";
+  if (diffDays > 1 && diffDays <= 6) return `${WEEKDAYS[date.getDay()]}`;
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+}
+
 export function minutesUntilKickoff(kickoffAt: string, now: Date = new Date()): number {
   return Math.round((new Date(kickoffAt).getTime() - now.getTime()) / 60_000);
 }

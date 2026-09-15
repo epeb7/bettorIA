@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./Header.module.css";
 import { formatPercent } from "@/lib/format";
 import { Glossary } from "./Glossary";
@@ -9,9 +10,11 @@ export function Header({ trackRecord }: { trackRecord?: TrackRecord }) {
       <div className={styles.left}>
         <span className={styles.wordmark}>bettorIA</span>
         {trackRecord && (
-          <span className={`${styles.clvPill} mono`}>
-            CLV {formatPercent(trackRecord.avgClv)}
-          </span>
+          <Link href="/historico" className={styles.clvLink} aria-label="Ver histórico">
+            <span className={`${styles.clvPill} mono`}>
+              CLV {formatPercent(trackRecord.avgClv)}
+            </span>
+          </Link>
         )}
       </div>
       <div className={styles.right}>

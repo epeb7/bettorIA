@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatKickoffLabel, minutesUntilKickoff, formatCountdown } from "./time";
+import { formatKickoffLabel, minutesUntilKickoff, formatCountdown, formatPastDate } from "./time";
 
 describe("formatKickoffLabel", () => {
   const now = new Date(2026, 8, 14, 12, 0); // 14/set/2026, meio-dia (mês 0-indexado)
@@ -61,5 +61,26 @@ describe("formatCountdown", () => {
   it("zero ou negativo -> ao vivo", () => {
     expect(formatCountdown(0)).toBe("ao vivo agora");
     expect(formatCountdown(-5)).toBe("ao vivo agora");
+  });
+});
+
+describe("formatPastDate", () => {
+  const now = new Date(2026, 8, 14, 12, 0);
+
+  it("mesmo dia -> 'hoje'", () => {
+    expect(formatPastDate(new Date(2026, 8, 14, 9, 0).toISOString(), now)).toBe("hoje");
+  });
+
+  it("dia anterior -> 'ontem'", () => {
+    expect(formatPastDate(new Date(2026, 8, 13, 21, 0).toISOString(), now)).toBe("ontem");
+  });
+
+  it("dentro da semana -> dia abreviado", () => {
+    const label = formatPastDate(new Date(2026, 8, 10, 21, 0).toISOString(), now);
+    expect(label).toMatch(/^(dom|seg|ter|qua|qui|sex|sáb)$/);
+  });
+
+  it("mais de uma semana -> data completa", () => {
+    expect(formatPastDate(new Date(2026, 7, 20, 21, 0).toISOString(), now)).toBe("20/08");
   });
 });

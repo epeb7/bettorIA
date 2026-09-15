@@ -427,3 +427,15 @@ nenhuma peça exige serviço pago.
   PIN a cada 5 dias e limite de 2 dispositivos (já desenhados, não
   implementados).
 - `SupabaseTokenStore` no lugar do `FileTokenStore`.
+
+---
+
+## Decisão: guard de ativação adiado (não pra Fase 0)
+
+`/` hoje é acessível sem checar sessão/dispositivo ativado. **Decisão consciente**:
+pra Fase 0 (fechada, só usuário + 1 amigo), aviso verbal sobre risco de compartilhamento
+substitui o guard técnico — não faz sentido construir proteção contra estranho quando só
+tem gente de confiança direta acessando.
+
+**Isso precisa voltar à mesa antes da Fase 2** (30-50 clientes que o usuário não conhece
+pessoalmente) — aviso verbal não escala pra gente desconhecida. Não esquecer.

@@ -24,6 +24,21 @@
   letter-spacing: -0.02em;
 }
 
+/* .clvLink é a área de toque (invisível, ~44px) — .clvPill é o visual
+   pequeno por dentro. Duas camadas porque o pill tem fundo colorido: só
+   aumentar o padding dele (como no CopyPixButton, que é texto solto sem
+   fundo) deixaria a pílula visualmente maior, não só o alvo de toque. */
+.clvLink {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 6px;
+  margin: -12px -6px;
+}
+.clvLink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .clvPill {
   font-size: 11.5px;
   font-weight: 500;
@@ -31,6 +46,9 @@
   background: var(--surface-2);
   border-radius: 100px;
   padding: 3px 9px;
+}
+.clvLink:hover .clvPill {
+  color: var(--positive);
 }
 
 .avatar {

@@ -20,4 +20,28 @@ export interface MatchAlert {
 export interface TrackRecord {
   windowLabel: string; // ex: "últimos 7 dias"
   avgClv: number; // ex 0.0184 = +1,84%
+  n: number; // quantidade de alertas na janela — dá credibilidade ao número
+  winRate: number; // ex 0.55 = 55% dos palpites ganharam (métrica secundária, ver HistoricalAlert)
+}
+
+/**
+ * Um alerta já fechado — resultado real, pra tela de histórico. Diferente
+ * de MatchAlert (que é "o que sugerimos agora"), aqui o que importa é
+ * `clv`, não `ev`: é a métrica que prova o motor, não o resultado de uma
+ * aposta isolada (ver CLAUDE.md § "Descoberta: CLV viabiliza o negócio").
+ * `outcome` é mostrado porque as pessoas entendem "ganhou/perdeu" de
+ * cara, mas é a métrica secundária — CLV positivo com aposta perdida
+ * ainda é o motor acertando, e a tela precisa deixar isso visível, não
+ * só os green.
+ */
+export interface HistoricalAlert {
+  id: string;
+  homeTeam: string;
+  awayTeam: string;
+  league: string;
+  market: string;
+  settledAt: string; // ISO 8601 — quando o jogo terminou
+  oddTaken: number;
+  clv: number; // pode ser negativo — mostrar sempre, nunca esconder
+  outcome: "won" | "lost" | "void";
 }
