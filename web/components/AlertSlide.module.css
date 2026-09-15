@@ -6,33 +6,35 @@
   /* grid de 2 linhas, não flex+justify-content:center — linhas de grid
      NUNCA se sobrepõem. Linha 1 (1fr) leva o conteúdo, centralizado
      dentro da própria linha; linha 2 (auto) é a dica de rolagem, do
-     tamanho exato que ela precisa. Antes a dica era position:absolute
-     num ponto fixo, e sobrepunha o texto em janelas largas-e-baixas
-     (desktop) onde o conteúdo "centralizado" cresce além do espaço
-     realmente livre. */
+     tamanho exato que ela precisa. */
   display: grid;
   grid-template-rows: 1fr auto;
-  padding: 28px 28px 14px;
+  padding: clamp(14px, 4vh, 28px) 28px clamp(6px, 2vh, 14px);
 }
 
 .content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  /* clamp() em vh, não px fixo — é ISSO que faz o conteúdo se ajustar
+     ao espaço disponível em vez de estourar e precisar de scroll
+     interno. Calibrado pra caber sem cortar nada tanto numa tela alta
+     de celular (844px) quanto numa janela larga-e-baixa de desktop
+     (~650px) — os dois formatos que efetivamente testei. */
+  gap: clamp(8px, 2.2vh, 24px);
   min-height: 0;
-  /* CRÍTICO: grid só garante que as TRILHAS não se sobrepõem — o
-     CONTEÚDO de uma célula ainda pode vazar pra célula vizinha se ele
-     mesmo não tiver overflow definido. min-height:0 sozinho não recorta
-     nada, só permite encolher; overflow-y é quem realmente evita o
-     vazamento. */
-  overflow-y: auto;
-  /* "safe center": centraliza quando cabe; quando NÃO cabe, vira
-     flex-start (alinha ao topo) em vez de cortar as duas pontas do
-     conteúdo igualmente — sem isso, numa janela baixa, o nome do time
-     lá em cima sumia tanto quanto o fim do texto lá embaixo. A
-     declaração sem "safe" antes é o fallback pra navegador muito
-     antigo que não reconhece a palavra-chave. */
+  /* overflow:hidden, NUNCA auto/scroll aqui — auto foi o que causava o
+     bug real: quando o conteúdo não cabia, o gesto de rolagem era
+     capturado por ESTE scroll interno em vez de avançar pro próximo
+     card no AlertFeed (scroll-snap do pai). hidden é só rede de
+     segurança pro caso extremo que o clamp() abaixo não cobrir — corta
+     silenciosamente em vez de criar um scroll que compete pelo mesmo
+     gesto do usuário. */
+  overflow: hidden;
+  /* "safe center": centraliza quando cabe; quando não cabe (mesmo com
+     clamp, num extremo), vira alinhamento do topo em vez de cortar as
+     duas pontas igualmente — o que se perde primeiro é o texto
+     secundário embaixo, nunca o título do jogo. */
   justify-content: center;
   justify-content: safe center;
 }
@@ -41,12 +43,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: clamp(3px, 0.8vh, 6px);
   text-align: center;
 }
 
 .league {
-  font-size: 12px;
+  font-size: clamp(10px, 1.6vh, 12px);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -54,18 +56,18 @@
 }
 
 .teams {
-  font-size: 24px;
+  font-size: clamp(18px, 3.2vh, 24px);
   font-weight: 800;
   letter-spacing: -0.01em;
 }
 
 .market {
-  font-size: 14px;
+  font-size: clamp(12px, 2vh, 14px);
   color: var(--muted);
 }
 
 .countdown {
-  font-size: 12px;
+  font-size: clamp(10px, 1.6vh, 12px);
   color: var(--accent);
   font-weight: 600;
 }
@@ -74,11 +76,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: clamp(2px, 0.6vh, 4px);
 }
 
 .heroLabel {
-  font-size: 12.5px;
+  font-size: clamp(10.5px, 1.7vh, 12.5px);
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -86,7 +88,9 @@
 }
 
 .heroValue {
-  font-size: 64px;
+  /* o número mais importante da tela — encolhe por último, e ainda
+     assim não menos que 40px, sempre continua sendo o "hero" visual */
+  font-size: clamp(40px, 8.5vh, 64px);
   font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--positive);
@@ -104,7 +108,7 @@
 .stat {
   background: var(--surface);
   border-radius: 16px;
-  padding: 14px 10px;
+  padding: clamp(6px, 1.4vh, 14px) 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -124,15 +128,15 @@
 
 .explain {
   max-width: 300px;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: clamp(11.5px, 1.8vh, 13px);
+  line-height: 1.4;
   color: var(--muted);
   text-align: center;
   margin: 0;
 }
 
 .hint {
-  /* item de grid normal agora — sempre logo abaixo do conteúdo, nunca
+  /* item de grid normal — sempre logo abaixo do conteúdo, nunca
      sobrepondo nada */
   justify-self: center;
   padding-top: 6px;
