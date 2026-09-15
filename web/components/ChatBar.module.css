@@ -11,6 +11,9 @@
   display: flex;
   gap: 8px;
   overflow-x: auto;
+  /* mesmo bug do HistoryList: overflow + sem flex-shrink:0 = pode
+     colapsar pra altura 0 quando o espaço aperta */
+  flex-shrink: 0;
 }
 
 .chip {

@@ -3,6 +3,12 @@
   gap: 8px;
   overflow-x: auto;
   padding: 0 22px;
+  /* CRÍTICO: um item flex com overflow diferente de "visible" tem altura
+     mínima automática = 0 (regra real do CSS flexbox). Sem flex-shrink:0,
+     quando a lista abaixo é grande e o espaço aperta, o flexbox espreme
+     ESTE elemento até sumir antes de mexer em qualquer outro — foi
+     exatamente o que aconteceu (chips no DOM, altura 0px, invisíveis). */
+  flex-shrink: 0;
 }
 .filters::-webkit-scrollbar {
   display: none;
