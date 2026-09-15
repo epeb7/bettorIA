@@ -1,0 +1,18 @@
+.shell {
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.content {
+  /* min-height:0 é o que permite um filho flex:1 rolar/encolher em vez
+     de estourar o pai — sem isso o conteúdo empurra a barra de abas
+     pra fora da tela no mobile */
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}

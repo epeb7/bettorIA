@@ -1,0 +1,77 @@
+.filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 22px;
+}
+.filters::-webkit-scrollbar {
+  display: none;
+}
+.filters {
+  scrollbar-width: none;
+}
+
+.chip {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: none;
+  border-radius: 100px;
+  padding: 8px 14px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+.chipActive {
+  color: white;
+  background: var(--accent);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 22px;
+  /* entra com fade leve toda vez que o filtro muda — mesma linguagem do
+     resto do app (ver web/lib/useFadeOnChange.ts) */
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.listShown {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.empty {
+  margin: 8px 22px 0;
+  padding: 22px 20px;
+  background: var(--surface-2);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.emptyBody {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip,
+  .list {
+    transition-duration: 1ms;
+    transform: none;
+  }
+}
