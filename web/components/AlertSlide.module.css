@@ -1,5 +1,16 @@
 .slide {
-  height: 100%;
+  /* min-height, NUNCA height fixo — height:100% forçava o card a ter
+     exatamente uma tela e conteúdo que não coubesse era cortado (ou,
+     numa tentativa anterior, ficava num scroll interno que o Firefox
+     "prendia" por várias rodinhas de mouse antes de deixar passar pro
+     próximo card — pior ainda). Com min-height, o caso comum (cabe numa
+     tela) fica idêntico a antes; no caso raro de tela muito baixa
+     (testado: celular ~375×600, ou janela de desktop mais baixa que
+     ~650px), o card simplesmente cresce um pouco além de 100% e o
+     ÚNICO scroll que existe — o do AlertFeed (scroll-snap entre
+     cards) — rola por dentro dele antes de avançar pro próximo, sem
+     nenhum scroll aninhado. Informação nunca é cortada. */
+  min-height: 100%;
   scroll-snap-align: start;
   scroll-snap-stop: always;
   flex-shrink: 0;
@@ -16,25 +27,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* clamp() em vh, não px fixo — é ISSO que faz o conteúdo se ajustar
-     ao espaço disponível em vez de estourar e precisar de scroll
-     interno. Calibrado pra caber sem cortar nada tanto numa tela alta
-     de celular (844px) quanto numa janela larga-e-baixa de desktop
-     (~650px) — os dois formatos que efetivamente testei. */
+  /* clamp() em vh, não px fixo — é o que faz o conteúdo caber numa
+     tela inteira no caso comum, ajustando ao espaço disponível.
+     Calibrado pra caber sem cortar tanto numa tela alta de celular
+     (844px) quanto numa janela larga-e-baixa de desktop (~650px). No
+     caso raro em que mesmo assim não cabe, .slide cresce (ver acima)
+     em vez de cortar ou criar scroll aninhado aqui. */
   gap: clamp(8px, 2.2vh, 24px);
   min-height: 0;
-  /* overflow:hidden, NUNCA auto/scroll aqui — auto foi o que causava o
-     bug real: quando o conteúdo não cabia, o gesto de rolagem era
-     capturado por ESTE scroll interno em vez de avançar pro próximo
-     card no AlertFeed (scroll-snap do pai). hidden é só rede de
-     segurança pro caso extremo que o clamp() abaixo não cobrir — corta
-     silenciosamente em vez de criar um scroll que compete pelo mesmo
-     gesto do usuário. */
-  overflow: hidden;
-  /* "safe center": centraliza quando cabe; quando não cabe (mesmo com
-     clamp, num extremo), vira alinhamento do topo em vez de cortar as
-     duas pontas igualmente — o que se perde primeiro é o texto
-     secundário embaixo, nunca o título do jogo. */
+  /* "safe center": centraliza quando cabe; quando .slide precisou
+     crescer (caso raro), vira alinhamento do topo em vez de esticar o
+     espaço em branco entre os elementos. */
   justify-content: center;
   justify-content: safe center;
 }

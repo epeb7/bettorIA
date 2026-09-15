@@ -2,19 +2,40 @@
   display: flex;
   gap: clamp(6px, 1.6vw, 8px);
   overflow-x: auto;
-  padding: 0 clamp(16px, 5vw, 22px);
+  padding: 0 clamp(16px, 5vw, 22px) 10px;
   /* CRÍTICO: um item flex com overflow diferente de "visible" tem altura
      mínima automática = 0 (regra real do CSS flexbox). Sem flex-shrink:0,
      quando a lista abaixo é grande e o espaço aperta, o flexbox espreme
      ESTE elemento até sumir antes de mexer em qualquer outro — foi
      exatamente o que aconteceu (chips no DOM, altura 0px, invisíveis). */
   flex-shrink: 0;
+  scroll-behavior: smooth;
+  /* scrollbar estilizada, não escondida — com muitos campeonatos ela é o
+     único sinal de que dá pra rolar pra ver mais (ex: "Premier League"
+     cortada na borda em telas largas-e-baixas). Fina, na cor de marca em
+     baixa opacidade — visível sem competir com os chips. */
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.58 0.14 260 / 0.32) transparent;
 }
 .filters::-webkit-scrollbar {
-  display: none;
+  height: 5px;
 }
-.filters {
-  scrollbar-width: none;
+.filters::-webkit-scrollbar-track {
+  background: transparent;
+}
+.filters::-webkit-scrollbar-thumb {
+  background: oklch(0.58 0.14 260 / 0.32);
+  border-radius: 100px;
+  transition: background-color 180ms ease;
+}
+.filters::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.58 0.14 260 / 0.52);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filters {
+    scroll-behavior: auto;
+  }
 }
 
 .chip {
