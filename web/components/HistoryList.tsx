@@ -65,8 +65,17 @@ function groupByRound(alerts: HistoricalAlert[]): RoundGroup[] {
     }
   }
 
+  // BUG REAL que já esteve aqui: um comparador que nunca devolve 0 pra
+  // valores iguais quebra o contrato de ordem total do sort() — e aqui
+  // dá empate de verdade (dois exemplos de ligas diferentes usando o
+  // mesmo daysAgo(N), ver SAMPLE_HISTORY). Resultado: server (Node) e
+  // cliente (navegador) podem ordenar o empate de jeitos diferentes,
+  // e o React detecta como "hydration mismatch" — descarta a árvore
+  // renderizada no servidor e refaz no cliente, o que pisca a tela em
+  // branco por um instante. localeCompare com 0 explícito no empate
+  // resolve: a ordenação fica estável e sempre igual dos dois lados.
   return [...groups.values()].sort((a, b) =>
-    a.latestSettledAt < b.latestSettledAt ? 1 : -1
+    b.latestSettledAt.localeCompare(a.latestSettledAt)
   );
 }
 

@@ -10,6 +10,31 @@
      exatamente o que aconteceu (chips no DOM, altura 0px, invisíveis). */
   flex-shrink: 0;
   scroll-behavior: smooth;
+  /* "safe center": centraliza o grupo de chips quando cabe sem rolagem
+     (em vez de ficar encostado à esquerda com espaço vazio sobrando à
+     direita); quando não cabe (caso comum, com 4+ ligas), "safe" cancela
+     a centralização — senão cortaria chip nas DUAS pontas em vez de só
+     numa, e o primeiro chip (o filtro ativo) precisa começar visível. */
+  justify-content: center;
+  justify-content: safe center;
+  /* fade nas bordas em vez de cortar a palavra do chip no meio — mesma
+     lógica de "nunca cortar informação bruscamente" do resto do app, só
+     que aqui a informação continua alcançável (é scroll, não crop): o
+     fade deixa claro que tem mais, sem parecer que quebrou no meio. */
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black clamp(16px, 5vw, 22px),
+    black calc(100% - clamp(16px, 5vw, 22px)),
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black clamp(16px, 5vw, 22px),
+    black calc(100% - clamp(16px, 5vw, 22px)),
+    transparent
+  );
   /* scrollbar estilizada, não escondida — com muitos campeonatos ela é o
      único sinal de que dá pra rolar pra ver mais (ex: "Premier League"
      cortada na borda em telas largas-e-baixas). Fina, na cor de marca em
