@@ -13,6 +13,7 @@
  * com centavo único")
  */
 import { generateActivationToken, activationLink } from "../auth/token";
+import { normalizeBrazilianMobile } from "../auth/phone";
 import { FileTokenStore } from "../auth/store";
 
 // TODO: trocar por variável de ambiente quando o domínio real existir.
@@ -42,10 +43,23 @@ function parseArgs(): { phone: string; name: string; amountCents: number } {
 
 async function main() {
   const { phone, name, amountCents } = parseArgs();
+
+  // pega erro de digitação AGORA — sem isso, um DDD trocado só ia
+  // aparecer como bug quando o cliente tentasse usar o link (ver
+  // auth/phone.ts pro porquê da validação, incluindo por que não dá
+  // pra simplesmente confirmar se o número existe de verdade)
+  const normalizedPhone = normalizeBrazilianMobile(phone);
+  if (!normalizedPhone) {
+    console.error(
+      `Número "${phone}" não parece um celular brasileiro válido — confere o DDD e se não falta/sobra dígito.`
+    );
+    process.exit(1);
+  }
+
   const store = new FileTokenStore(STORE_PATH);
 
   const token = generateActivationToken({
-    clientPhone: phone,
+    clientPhone: normalizedPhone,
     clientName: name,
     amountPaidCents: amountCents,
   });
@@ -53,7 +67,7 @@ async function main() {
 
   const link = activationLink(BASE_URL, token);
 
-  console.log(`\nAtivação gerada pra ${name} (${phone})`);
+  console.log(`\nAtivação gerada pra ${name} (${normalizedPhone})`);
   console.log(`Valor conferido: R$ ${(amountCents / 100).toFixed(2).replace(".", ",")}`);
   console.log(`\nCola isso no WhatsApp do cliente:\n`);
   console.log(link);
